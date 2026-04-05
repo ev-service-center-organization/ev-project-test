@@ -71,12 +71,19 @@ export const getVehicleById = async (req, res) => {
 
 export const getVehiclesByUserId = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = parseInt(req.params.userId);
+
+    // STT 3: Kiểm tra User ID âm hoặc không phải số hợp lệ
+    if (isNaN(userId) || userId < 0) {
+      return res.status(400).json({ message: "Invalid User ID" });
+    }
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
+
     const { rows, count } = await Vehicle.findAndCountAll({
-      where: { userId: parseInt(userId) },
+      where: { userId: userId },
       include: Reminder,
       limit,
       offset,
@@ -92,6 +99,7 @@ export const getVehiclesByUserId = async (req, res) => {
       hasPrev: page > 1
     });
   } catch (err) {
+    // Trả về 500 cho các lỗi hệ thống khác
     res.status(500).json({ message: err.message });
   }
 };
