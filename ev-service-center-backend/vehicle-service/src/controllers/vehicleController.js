@@ -5,8 +5,21 @@ import { Op } from 'sequelize';
 export const getAllVehicles = async (req, res) => {
   try {
     const { keyword, userId } = req.query;
+    
+    // Lấy giá trị limit từ query, mặc định là 10
+    let limit = parseInt(req.query.limit);
+    
+    // STT 1: Nếu limit <= 0 hoặc không phải số, đặt mặc định là 10
+    if (!limit || limit <= 0) {
+      limit = 10;
+    }
+    
+    // STT 4: Nếu vượt quá giới hạn hệ thống (100), cắt về 100
+    if (limit > 100) {
+      limit = 100;
+    }
+
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
     const whereClause = {};
@@ -22,18 +35,19 @@ export const getAllVehicles = async (req, res) => {
       ];
     }
 
-    const { rows, count } = await Vehicle.findAndCountAll({
+   const { rows, count } = await Vehicle.findAndCountAll({
       where: whereClause,
       include: Reminder,
-      limit,
+      limit, // Sử dụng limit đã được xử lý
       offset,
       order: [['createdAt', 'DESC']]
     });
+
     res.status(200).json({
       data: rows,
       total: count,
       page,
-      limit,
+      limit, // Trả về limit thực tế đã áp dụng
       totalPages: Math.ceil(count / limit),
       hasNext: offset + limit < count,
       hasPrev: page > 1
