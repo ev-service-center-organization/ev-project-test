@@ -16,7 +16,20 @@ id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   },
   brand: { type: DataTypes.STRING, allowNull: false },
   model: { type: DataTypes.STRING },
-  year: { type: DataTypes.INTEGER },
+  year: { 
+    type: DataTypes.INTEGER,
+    validate: {
+      // Ràng buộc năm sản xuất từ 1900 đến 2025 theo yêu cầu test case
+      min: {
+        args: [1900],
+        msg: "Year must be 1900 or later"
+      },
+      max: {
+        args: [2026],
+        msg: "Year cannot be in the future (max 2026)"
+      }
+    }
+  },
   userId: { type: DataTypes.INTEGER, allowNull: false },
 });
 

@@ -103,13 +103,25 @@ export const createVehicle = async (req, res) => {
 export const updateVehicle = async (req, res) => {
   try {
     const vehicle = await Vehicle.findByPk(req.params.id);
-    if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' });
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    // Thực hiện cập nhật dữ liệu từ body
     await vehicle.update(req.body);
+
     res.status(200).json({
       data: vehicle,
       message: 'Vehicle updated successfully'
     });
   } catch (err) {
+    // Nếu vi phạm ràng buộc về năm (min/max) hoặc độ dài biển số (len)
+    if (err.name === 'SequelizeValidationError') {
+      return res.status(400).json({ 
+        message: err.errors.map(e => e.message).join(', ') 
+      });
+    }
+    // Các lỗi khác trả về 500
     res.status(500).json({ message: err.message });
   }
 };
