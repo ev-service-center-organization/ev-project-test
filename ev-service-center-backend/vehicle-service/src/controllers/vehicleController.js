@@ -150,8 +150,20 @@ export const updateVehicle = async (req, res) => {
 
 export const deleteVehicle = async (req, res) => {
   try {
-    const vehicle = await Vehicle.findByPk(req.params.id);
-    if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' });
+    const id = parseInt(req.params.id);
+
+    // STT 1: Kiểm tra ID không hợp lệ (ví dụ: số âm)
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).json({ message: 'Invalid Vehicle ID' });
+    }
+
+    const vehicle = await Vehicle.findByPk(id);
+
+    // Trả về 404 nếu không tìm thấy xe (Dành cho STT 1 hoặc STT 3 khi ID không tồn tại)
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
     await vehicle.destroy();
     res.status(200).json({ 
       message: 'Vehicle deleted successfully' 
