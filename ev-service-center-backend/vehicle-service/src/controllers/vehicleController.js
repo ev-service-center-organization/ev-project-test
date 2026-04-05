@@ -150,10 +150,19 @@ export const addReminder = async (req, res) => {
       message: 'Reminder created successfully'
     });
   } catch (err) {
+    // Bắt lỗi độ dài message hoặc các lỗi validation khác từ Sequelize
+    if (err.name === 'SequelizeValidationError') {
+      return res.status(400).json({ 
+        message: err.errors.map(e => e.message).join(', ') 
+      });
+    }
+    // Bắt lỗi dữ liệu quá dài ở tầng Database (MySQL)
+    if (err.parent?.code === 'ER_DATA_TOO_LONG') {
+      return res.status(400).json({ message: "Nội dung vượt quá giới hạn 255 ký tự" });
+    }
     res.status(400).json({ message: err.message });
   }
 };
-
 export const getReminders = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;

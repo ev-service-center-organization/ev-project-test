@@ -5,7 +5,16 @@ import Vehicle from './vehicle.js';
 const Reminder = sequelize.define('Reminder', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   vehicleId: { type: DataTypes.INTEGER, allowNull: false },
-  message: { type: DataTypes.STRING, allowNull: false },
+  message: { 
+    type: DataTypes.STRING(255), 
+    allowNull: false,
+    validate: {
+      len: {
+        args: [1, 255],
+        msg: "Nội dung nhắc nhở phải có độ dài từ 1 đến 255 ký tự"
+      }
+    }
+  },
   date: { type: DataTypes.DATE, allowNull: false },
   completed: { type: DataTypes.BOOLEAN, defaultValue: false },
 });
