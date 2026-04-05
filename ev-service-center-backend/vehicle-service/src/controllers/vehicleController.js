@@ -90,6 +90,12 @@ export const createVehicle = async (req, res) => {
       message: 'Vehicle created successfully'
     });
   } catch (err) {
+    // Nếu là lỗi validation từ Sequelize, trả về message cụ thể
+    if (err.name === 'SequelizeValidationError') {
+      return res.status(400).json({ 
+        message: err.errors.map(e => e.message).join(', ') 
+      });
+    }
     res.status(400).json({ message: err.message });
   }
 };
