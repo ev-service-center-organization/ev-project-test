@@ -1,75 +1,24 @@
-import axios from 'axios';
+import 'dotenv/config';
+import app, { sequelize } from './src/app.js';
 
-const API_GATEWAY_URL = process.env.API_GATEWAY_URL;
+const PORT = process.env.PORT || 5002;
 
-export const userClient = {
-    async getUserById(userId) {
-        try {
-            const response = await axios.get(`${API_GATEWAY_URL}/api/auth/users/${userId}`);
-            return response.data.data || response.data;
-        } catch (error) {
-            console.error('Error fetching user:', error.message);
-            throw new Error(`Failed to fetch user with ID ${userId}`);
-        }
-    },
+const startServer = async () => {
+    try {
+        await sequelize.authenticate();
+        console.log('✅ Đã thông kết nối với MySQL (Pass: 1234)!');
 
-    async getUsersByIds(userIds) {
-        try {
-            const userPromises = userIds.map(id => this.getUserById(id));
-            const users = await Promise.all(userPromises);
-            return users;
-        } catch (error) {
-            console.error('Error fetching users:', error.message);
-            throw new Error('Failed to fetch users');
-        }
+        // force: true sẽ xóa bảng cũ (nếu có) và tạo lại bảng mới hoàn toàn
+        await sequelize.sync({ force: true }); 
+        console.log('✅ Bảng "appointments" đã được xây lại xong!');
+
+        app.listen(PORT, () => {
+            console.log(`🚀 Booking Service running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error('❌ Lỗi khởi động:', error.message);
+        process.exit(1);
     }
 };
 
-export const vehicleClient = {
-    async getVehicleById(vehicleId) {
-        try {
-            const response = await axios.get(`${API_GATEWAY_URL}/api/vehicle/${vehicleId}`);
-            return response.data.data;
-        } catch (error) {
-            console.error('Error fetching vehicle:', error.message);
-            throw new Error(`Failed to fetch vehicle with ID ${vehicleId}`);
-        }
-    },
-
-    async getVehiclesByIds(vehicleIds) {
-        try {
-            const vehiclePromises = vehicleIds.map(id => this.getVehicleById(id));
-            const vehicles = await Promise.all(vehiclePromises);
-            return vehicles;
-        } catch (error) {
-            console.error('Error fetching vehicles:', error.message);
-            throw new Error('Failed to fetch vehicles');
-        }
-    }
-};
-
-export const notificationClient = {
-    async createNotification(notificationData) {
-        try {
-            const response = await axios.post(`${API_GATEWAY_URL}/api/notification`, notificationData);
-            return response.data;
-        } catch (error) {
-            console.error('Error creating notification:', error.message);
-            throw new Error('Failed to create notification');
-        }
-    },
-
-    async createMultipleNotifications(notifications) {
-        try {
-            const notificationPromises = notifications.map(notification => 
-                this.createNotification(notification)
-            );
-            const results = await Promise.all(notificationPromises);
-            return results;
-        } catch (error) {
-            console.error('Error creating multiple notifications:', error.message);
-            throw new Error('Failed to create multiple notifications');
-        }
-    }
-};
-
+startServer();
