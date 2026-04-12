@@ -1,16 +1,35 @@
 import Notification from '../models/notification.js';
 
+const getPagination = (query) => {
+  const page = parseInt(query.page);
+  const limit = parseInt(query.limit);
+
+  const finalPage = (isNaN(page) || page < 1) ? 1 : page;
+
+  let finalLimit = isNaN(limit) ? 10 : Math.max(0, limit);
+  finalLimit = Math.min(finalLimit, 100);
+
+  const offset = (finalPage - 1) * finalLimit;
+  return { limit: finalLimit, offset, page: finalPage };
+};
+
 export const getAllNotifications = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
+    const { limit, offset, page } = getPagination(req.query);
+
+    if (limit === 0) {
+      return res.status(200).json({
+        data: [], total: 0, page, limit: 0,
+        totalPages: 0, hasNext: false, hasPrev: false
+      });
+    }
 
     const { rows, count } = await Notification.findAndCountAll({
       limit,
       offset,
       order: [['createdAt', 'DESC']]
     });
+
     res.status(200).json({
       data: rows,
       total: count,
@@ -27,22 +46,18 @@ export const getAllNotifications = async (req, res) => {
 
 export const getNotifications = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-    
-    // Build where clause based on filters
-    const whereClause = {};
-    
+    const { limit, offset, page } = getPagination(req.query);
 
-    if (req.query.status) {
-      whereClause.status = req.query.status;
+    if (limit === 0) {
+      return res.status(200).json({
+        data: [], total: 0, page, limit: 0,
+        totalPages: 0, hasNext: false, hasPrev: false
+      });
     }
-    
-  
-    if (req.query.userId) {
-      whereClause.userId = req.query.userId;
-    }
+
+    const whereClause = {};
+    if (req.query.status) whereClause.status = req.query.status;
+    if (req.query.userId) whereClause.userId = req.query.userId;
 
     const { rows, count } = await Notification.findAndCountAll({
       where: whereClause,
@@ -50,7 +65,7 @@ export const getNotifications = async (req, res) => {
       offset,
       order: [['createdAt', 'DESC']]
     });
-    
+
     res.status(200).json({
       data: rows,
       total: count,
@@ -67,16 +82,22 @@ export const getNotifications = async (req, res) => {
 
 export const getNotificationsByUser = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
+    const { limit, offset, page } = getPagination(req.query);
 
-    const { rows, count } = await Notification.findAndCountAll({ 
+    if (limit === 0) {
+      return res.status(200).json({
+        data: [], total: 0, page, limit: 0,
+        totalPages: 0, hasNext: false, hasPrev: false
+      });
+    }
+
+    const { rows, count } = await Notification.findAndCountAll({
       where: { userId: req.params.userId },
       limit,
       offset,
       order: [['createdAt', 'DESC']]
     });
+
     res.status(200).json({
       data: rows,
       total: count,
