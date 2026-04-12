@@ -106,18 +106,50 @@ export const getVehiclesByUserId = async (req, res) => {
 
 export const createVehicle = async (req, res) => {
   try {
+    const { userId, brand, model, year } = req.body;
+
+    // --- Validation cho Brand ---
+    // TC 6 & 10: Không được null hoặc để trống
+    if (brand === undefined || brand === null || String(brand).trim() === "") {
+      return res.status(400).json({ message: "Brand is required and cannot be empty" });
+    }
+    // TC 9: Giới hạn độ dài Max = 50
+    if (brand.length > 50) {
+      return res.status(400).json({ message: "Brand name exceeds maximum length (50 characters)" });
+    }
+
+    // --- Validation cho Model ---
+    // TC 11 & 15: Không được null hoặc để trống
+    if (model === undefined || model === null || String(model).trim() === "") {
+      return res.status(400).json({ message: "Model is required and cannot be empty" });
+    }
+    // TC 14: Giới hạn độ dài Max = 50
+    if (model.length > 50) {
+      return res.status(400).json({ message: "Model name exceeds maximum length (50 characters)" });
+    }
+    if (userId === undefined || userId === null || userId === "") {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const userIdNum = parseInt(userId);
+
+    // Kiểm tra phải là định dạng số
+    if (isNaN(userIdNum)) {
+      return res.status(400).json({ message: "userId must be a valid number" });
+    }
+
+    // TC 21: Kiểm tra giá trị biên dưới (userId < 1)
+    if (userIdNum < 1) {
+      return res.status(400).json({ message: "userId must be a positive integer" });
+    }
+
+    // Nếu hợp lệ, tiến hành tạo mới
     const newVehicle = await Vehicle.create(req.body);
     res.status(201).json({
       data: newVehicle,
       message: 'Vehicle created successfully'
     });
   } catch (err) {
-    // Nếu là lỗi validation từ Sequelize, trả về message cụ thể
-    if (err.name === 'SequelizeValidationError') {
-      return res.status(400).json({ 
-        message: err.errors.map(e => e.message).join(', ') 
-      });
-    }
     res.status(400).json({ message: err.message });
   }
 };
@@ -173,27 +205,44 @@ export const deleteVehicle = async (req, res) => {
   }
 };
 
+// File: ev-service-center-backend/vehicle-service/src/controllers/vehicleController.js
+
 export const addReminder = async (req, res) => {
   try {
+    const { date } = req.body;
+
+    if (!date) {
+      return res.status(400).json({ message: "Reminder date is required" });
+    }
+
+    const inputDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Đặt về đầu ngày để so sánh chính xác
+
+    const hundredYearsLater = new Date();
+    hundredYearsLater.setFullYear(today.getFullYear() + 100);
+
+    // 1. Kiểm tra ngày ở quá khứ (Min-)
+    if (inputDate < today) {
+      return res.status(400).json({ message: "Date cannot be in the past" });
+    }
+
+    // 2. Kiểm tra giới hạn 100 năm (Max+)
+    if (inputDate > hundredYearsLater) {
+      return res.status(400).json({ message: "Date cannot exceed 100 years from now" });
+    }
+
+    // Nếu hợp lệ (Min, Nominal, Max), tiến hành tạo mới
     const reminder = await Reminder.create({
       vehicleId: req.params.vehicle_id,
       ...req.body,
     });
+    
     res.status(201).json({
       data: reminder,
       message: 'Reminder created successfully'
     });
   } catch (err) {
-    // Bắt lỗi độ dài message hoặc các lỗi validation khác từ Sequelize
-    if (err.name === 'SequelizeValidationError') {
-      return res.status(400).json({ 
-        message: err.errors.map(e => e.message).join(', ') 
-      });
-    }
-    // Bắt lỗi dữ liệu quá dài ở tầng Database (MySQL)
-    if (err.parent?.code === 'ER_DATA_TOO_LONG') {
-      return res.status(400).json({ message: "Nội dung vượt quá giới hạn 255 ký tự" });
-    }
     res.status(400).json({ message: err.message });
   }
 };
