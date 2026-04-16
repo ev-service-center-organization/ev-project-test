@@ -26,7 +26,12 @@ export default function ChatBox({ roomId }: { roomId: string }) {
     e.preventDefault();
     if (!newMessage.trim() || !user) return;
 
-    await sendMessage(roomId, newMessage, user);
+    await sendMessage(roomId, newMessage, {
+      id: user.id,
+      role: user.userRoles?.[0]?.role?.name?.toUpperCase() || "USER",
+      name: user.username || user.email || "Người dùng",
+      email: user.email,
+    });
     setNewMessage("");
   };
 

@@ -52,7 +52,30 @@ export const getServiceCenterById = async (req, res) => {
 
 export const createServiceCenter = async (req, res) => {
   try {
-    const created = await ServiceCenter.create(req.body);
+    const { name, address, phone } = req.body;
+
+    if (!name || name.length < 3) {
+      return res.status(400).json({ message: 'Lỗi B5.1: Tên trung tâm quá ngắn' });
+    }
+
+    if (!phone) {
+      return res.status(400).json({ message: 'Số điện thoại là bắt buộc' });
+    }
+
+    const phoneRegex = /^[0-9]+$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ message: 'Lỗi B5.5: Số điện thoại chứa ký tự lạ' });
+    }
+
+    if (phone.length === 9) {
+      return res.status(400).json({ message: 'Lỗi B5.2: Số điện thoại thiếu số' });
+    }
+
+    if (phone.length !== 10 && phone.length !== 11) {
+      return res.status(400).json({ message: 'Số điện thoại không hợp lệ' });
+    }
+
+    const created = await ServiceCenter.create({ name, address, phone });
     res.status(201).json({
       data: created,
       message: 'Service center created successfully'

@@ -14,7 +14,7 @@ import {
   deleteChecklistItem,
   getRevenueStats,
   getTaskStats,
-} from '../controllers/workOrderController.js';
+} from '../controllers/workorderController.js';
 
 const router = express.Router();
 

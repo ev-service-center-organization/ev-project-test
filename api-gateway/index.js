@@ -13,12 +13,13 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("combined"));
 
-const proxyTo = (target) =>
+const proxyTo = (target, pathRewrite) =>
   createProxyMiddleware({
     target,
     changeOrigin: true,
     proxyTimeout: 30000,
     timeout: 30000,
+    pathRewrite,
     logLevel: "warn",
     onProxyReq: (proxyReq, req, res) => {
       // Forward body nếu có
@@ -33,8 +34,11 @@ const proxyTo = (target) =>
 
 // Mapping các service
 app.use("/api/auth", proxyTo("http://auth-service:5001"));
-app.use("/api/booking", proxyTo("http://booking-service:5002"));
-app.use("/api/service-center", proxyTo("http://booking-service:5002"));
+app.use("/api/booking", proxyTo("http://booking-service:5002", { "^/api/booking": "/booking" }));
+app.use(
+  "/api/service-center",
+  proxyTo("http://booking-service:5002", { "^/api/service-center": "/service-center" })
+);
 
 app.use("/api/finance", proxyTo("http://finance-service:5003"));
 app.use("/api/invoice", proxyTo("http://finance-service:5003"));

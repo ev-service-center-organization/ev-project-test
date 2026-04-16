@@ -1,0 +1,275 @@
+RET 0
+STDOUT:
+***************************************
+nodeInfo:  24.14.0
+osInfo:  Windows 11 10.0.26200
+cpuInfo:  (12) x64 12th Gen Intel(R) Core(TM) i5-12450H
+chromeInfo:  Not Found
+edgeInfo:  Chromium (143.0.3650.139)
+firefoxInfo:  N/A
+safariInfo:  N/A
+playwrightBrowsers:  "chromium: 147.0.7727.15, firefox: 148.0.2, webkit: 26.4"
+If you need more detailed info, just run this: npx codeceptjs info
+***************************************
+CodeceptJS v3.7.8 #StandWithUkraine
+Using test root "d:\Test\KTPM\ev-project-test"
+Helpers: REST, JSONResponse
+Plugins: screenshotOnFail
+
+Booking Service - Full Test --
+d:\Test\KTPM\ev-project-test\tests\booking_test.js
+    [1]  Starting recording promises
+    Timeouts: 
+  Tạo booking hợp lệ
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] {"status":"pending","id":23,"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase","updatedAt":"2026-04-16T05:35:56.574Z","createdAt":"2026-04-16T05:35:56.574Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null,"data":{"status":"pending","id":23,"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase","updatedAt":"2026-04-16T05:35:56.574Z","createdAt":"2026-04-16T05:35:56.574Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null},"message":"Appointment created successfully"}
+    I see response code is 201
+    I see response contains json {"status":"pending"}
+    I see response contains json {"userId":2}
+    I see response contains json {"vehicleId":1}
+    I see response contains json {"serviceCenterId":1}
+    I see response contains json {"notes":"Ghi chú đặt lịch từ testcase"}
+  √ OK in 107ms
+
+  Tạo booking thiếu trường bắt buộc userId
+  Scenario()
+    I send post request "/booking", {"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Missing userId"}
+    I see response code is 400
+  √ OK in 14ms
+
+  Tạo booking thiếu trường bắt buộc serviceCenterId
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Missing serviceCenterId"}
+    I see response code is 400
+  √ OK in 10ms
+
+  Tạo booking thiếu timeSlot
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Missing timeSlot"}
+    I see response code is 400
+  √ OK in 11ms
+
+  Tạo booking với timeSlot rỗng
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Missing timeSlot"}
+    I see response code is 400
+  √ OK in 9ms
+
+  Tạo booking thiếu startTime
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Missing startTime"}
+    I see response code is 400
+  √ OK in 9ms
+
+  Tạo booking thiếu date
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Missing date"}
+    I see response code is 400
+  √ OK in 9ms
+
+  Tạo booking với date sai định dạng
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"25-03-2026","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"25-03-2026","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Invalid date format"}
+    I see response code is 400
+  √ OK in 9ms
+
+  Tạo booking với ngày quá khứ
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-15","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-15","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Date must not be in the past"}
+    I see response code is 400
+  √ OK in 13ms
+
+  Tạo booking với timeSlot quá dài
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"timeSlot too long"}
+    I see response code is 400
+  √ OK in 13ms
+
+  Tạo booking với ghi chú quá dài
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Notes too long"}
+    I see response code is 400
+  √ OK in 9ms
+
+  Tạo booking với userId không tồn tại
+  Scenario()
+    I send post request "/booking", {"userId":999999,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":999999,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 404
+    » [Response] {"message":"User not found"}
+    I see response code is 404
+  √ OK in 12ms
+
+  Lấy danh sách booking
+  Scenario()
+    I send get request "/booking"
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","headers":{"Content-Type":"application/json"}}
+    » [Response] {"data":[{"id":23,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"pending","notes":"Ghi chú đặt lịch từ testcase","createdById":2,"createdAt":"2026-04-16T05:35:56.000Z","updatedAt":"2026-04-16T05:35:56.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"},{"id":21,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"confirmed","notes":"Đã gọi điện xác nhận với khách hàng.","createdById":2,"createdAt":"2026-04-16T05:35:42.000Z","updatedAt":"2026-04-16T05:35:42.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"},{"id":20,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"pending","notes":"Ghi chú đặt lịch từ testcase","createdById":2,"createdAt":"2026-04-16T05:35:42.000Z","updatedAt":"2026-04-16T05:35:42.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"},{"id":19,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"pending","notes":"Ghi chú đặt lịch từ testcase","createdById":2,"createdAt":"2026-04-16T05:35:42.000Z","updatedAt":"2026-04-16T05:35:42.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"},{"id":17,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"confirmed","notes":"Đã gọi điện xác nhận với khách hàng.","createdById":2,"createdAt":"2026-04-16T05:35:31.000Z","updatedAt":"2026-04-16T05:35:31.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"},{"id":16,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"pending","notes":"Ghi chú đặt lịch từ testcase","createdById":2,"createdAt":"2026-04-16T05:35:31.000Z","updatedAt":"2026-04-16T05:35:31.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"},{"id":15,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"pending","notes":"Ghi chú đặt lịch từ testcase","createdById":2,"createdAt":"2026-04-16T05:35:30.000Z","updatedAt":"2026-04-16T05:35:30.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"},{"id":12,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"pending","notes":"Ghi chú đặt lịch từ testcase","createdById":2,"createdAt":"2026-04-16T05:35:20.000Z","updatedAt":"2026-04-16T05:35:20.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"},{"id":13,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"confirmed","notes":"Đã gọi điện xác nhận với khách hàng.","createdById":2,"createdAt":"2026-04-16T05:35:20.000Z","updatedAt":"2026-04-16T05:35:20.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"},{"id":11,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"pending","notes":"Ghi chú đặt lịch từ testcase","createdById":2,"createdAt":"2026-04-16T05:35:20.000Z","updatedAt":"2026-04-16T05:35:20.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":null,"vehicle":null,"error":"Failed to fetch related data"}],"total":17,"page":1,"limit":10,"totalPages":2,"hasNext":true,"hasPrev":false}
+    I see response code is 200
+  √ OK in 22ms
+
+  Lấy booking theo ID thành công
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] {"status":"pending","id":24,"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase","updatedAt":"2026-04-16T05:35:56.786Z","createdAt":"2026-04-16T05:35:56.786Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null,"data":{"status":"pending","id":24,"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase","updatedAt":"2026-04-16T05:35:56.786Z","createdAt":"2026-04-16T05:35:56.786Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null},"message":"Appointment created successfully"}
+    I see response code is 201
+    I send get request "/booking/24"
+    » [Request] {"baseURL":"http://localhost:8080/api/booking/24","headers":{"Content-Type":"application/json"}}
+    » [Response] {"data":{"id":24,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"pending","notes":"Ghi chú đặt lịch từ testcase","createdById":2,"createdAt":"2026-04-16T05:35:56.000Z","updatedAt":"2026-04-16T05:35:56.000Z","serviceCenter":{"id":1,"name":"TEST","address":"HCM","phone":"123","email":null,"createdAt":"2026-04-16T05:34:01.000Z","updatedAt":"2026-04-16T05:34:01.000Z"},"user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null}}
+    I see response code is 200
+  √ OK in 56ms
+
+  Lấy booking theo ID không tồn tại
+  Scenario()
+    I send get request "/booking/999999"
+    » [Request] {"baseURL":"http://localhost:8080/api/booking/999999","headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 404
+    » [Response] {"message":"Appointment not found"}
+    I see response code is 404
+  √ OK in 12ms
+
+  Cập nhật booking không tồn tại
+  Scenario()
+    I send put request "/booking/999999", {"status":"confirmed"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking/999999","method":"PUT","data":{"status":"confirmed"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 404
+    » [Response] {"message":"Appointment not found"}
+    I see response code is 404
+  √ OK in 12ms
+
+  Cập nhật trạng thái booking sang confirmed
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] {"status":"pending","id":25,"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase","updatedAt":"2026-04-16T05:35:56.872Z","createdAt":"2026-04-16T05:35:56.872Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null,"data":{"status":"pending","id":25,"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase","updatedAt":"2026-04-16T05:35:56.872Z","createdAt":"2026-04-16T05:35:56.872Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null},"message":"Appointment created successfully"}
+    I see response code is 201
+    I send put request "/booking/25", {"status":"confirmed","notes":"Đã gọi điện xác nhận với khách hàng."}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking/25","method":"PUT","data":{"status":"confirmed","notes":"Đã gọi điện xác nhận với khách hàng."},"headers":{"Content-Type":"application/json"}}
+    » [Response] {"id":25,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"confirmed","notes":"Đã gọi điện xác nhận với khách hàng.","createdById":2,"createdAt":"2026-04-16T05:35:56.000Z","updatedAt":"2026-04-16T05:35:56.908Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null,"data":{"id":25,"userId":2,"serviceCenterId":1,"vehicleId":1,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","status":"confirmed","notes":"Đã gọi điện xác nhận với khách hàng.","createdById":2,"createdAt":"2026-04-16T05:35:56.000Z","updatedAt":"2026-04-16T05:35:56.908Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null},"message":"Appointment updated successfully"}
+    I see response code is 200
+    I see response contains json {"status":"confirmed"}
+    I see response contains json {"notes":"Đã gọi điện xác nhận với khách hàng."}
+    I see response contains json {"id":25}
+  √ OK in 78ms
+
+  Xóa booking thành công
+  Scenario()
+    I send post request "/booking", {"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"}
+    » [Request] {"baseURL":"http://localhost:8080/api/booking","method":"POST","data":{"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17","startTime":"2026-04-17","endTime":"2026-04-17","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase"},"headers":{"Content-Type":"application/json"}}
+    » [Response] {"status":"pending","id":26,"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase","updatedAt":"2026-04-16T05:35:56.950Z","createdAt":"2026-04-16T05:35:56.950Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null,"data":{"status":"pending","id":26,"userId":2,"vehicleId":1,"serviceCenterId":1,"createdById":2,"date":"2026-04-17T00:00:00.000Z","startTime":"2026-04-17T00:00:00.000Z","endTime":"2026-04-17T00:00:00.000Z","timeSlot":"08:00 - 09:00","notes":"Ghi chú đặt lịch từ testcase","updatedAt":"2026-04-16T05:35:56.950Z","createdAt":"2026-04-16T05:35:56.950Z","user":{"id":2,"username":"user5175","email":"user5175@gmail.com","userRoles":[{"role":{"name":"user"}}],"createdAt":"2026-04-15T18:04:52.000Z","updatedAt":"2026-04-15T18:04:52.000Z"},"vehicle":null},"message":"Appointment created successfully"}
+    I see response code is 201
+    I send delete request "/booking/26"
+    » [Request] {"baseURL":"http://localhost:8080/api/booking/26","method":"DELETE","headers":{"Content-Type":"application/json"}}
+    » [Response] {"message":"Appointment deleted successfully"}
+    I see response code is 200
+  √ OK in 53ms
+
+  Xóa booking không tồn tại
+  Scenario()
+    I send delete request "/booking/999999"
+    » [Request] {"baseURL":"http://localhost:8080/api/booking/999999","method":"DELETE","headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 404
+    » [Response] {"message":"Appointment not found"}
+    I see response code is 404
+  √ OK in 12ms
+
+  Tạo service center thành công
+  Scenario()
+    I send post request "/service-center", {"name":"Service Center A","address":"Q12, Ho Chi Minh City","phone":"0901234567"}
+    » [Request] {"baseURL":"http://localhost:8080/api/service-center","method":"POST","data":{"name":"Service Center A","address":"Q12, Ho Chi Minh City","phone":"0901234567"},"headers":{"Content-Type":"application/json"}}
+    » [Response] {"data":{"id":7,"name":"Service Center A","address":"Q12, Ho Chi Minh City","phone":"0901234567","updatedAt":"2026-04-16T05:35:57.012Z","createdAt":"2026-04-16T05:35:57.012Z"},"message":"Service center created successfully"}
+    I see response code is 201
+  √ OK in 16ms
+
+  Tạo service center với tên quá ngắn
+  Scenario()
+    I send post request "/service-center", {"name":"AB","address":"Q12, Ho Chi Minh City","phone":"0901234567"}
+    » [Request] {"baseURL":"http://localhost:8080/api/service-center","method":"POST","data":{"name":"AB","address":"Q12, Ho Chi Minh City","phone":"0901234567"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Lỗi B5.1: Tên trung tâm quá ngắn"}
+    I see response code is 400
+  √ OK in 10ms
+
+  Tạo service center với phone chứa ký tự lạ
+  Scenario()
+    I send post request "/service-center", {"name":"Service Center Test","address":"Q12, Ho Chi Minh City","phone":"09012A4567"}
+    » [Request] {"baseURL":"http://localhost:8080/api/service-center","method":"POST","data":{"name":"Service Center Test","address":"Q12, Ho Chi Minh City","phone":"09012A4567"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Lỗi B5.5: Số điện thoại chứa ký tự lạ"}
+    I see response code is 400
+  √ OK in 8ms
+
+  Tạo service center với phone thiếu số
+  Scenario()
+    I send post request "/service-center", {"name":"Service Center Test","address":"Q12, Ho Chi Minh City","phone":"090123456"}
+    » [Request] {"baseURL":"http://localhost:8080/api/service-center","method":"POST","data":{"name":"Service Center Test","address":"Q12, Ho Chi Minh City","phone":"090123456"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Lỗi B5.2: Số điện thoại thiếu số"}
+    I see response code is 400
+  √ OK in 11ms
+
+  Tạo service center với phone không hợp lệ
+  Scenario()
+    I send post request "/service-center", {"name":"Service Center Test","address":"Q12, Ho Chi Minh City","phone":"090123456789"}
+    » [Request] {"baseURL":"http://localhost:8080/api/service-center","method":"POST","data":{"name":"Service Center Test","address":"Q12, Ho Chi Minh City","phone":"090123456789"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Số điện thoại không hợp lệ"}
+    I see response code is 400
+  √ OK in 7ms
+
+  Tạo service center thiếu tên
+  Scenario()
+    I send post request "/service-center", {"address":"Q12, Ho Chi Minh City","phone":"0901234567"}
+    » [Request] {"baseURL":"http://localhost:8080/api/service-center","method":"POST","data":{"address":"Q12, Ho Chi Minh City","phone":"0901234567"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Lỗi B5.1: Tên trung tâm quá ngắn"}
+    I see response code is 400
+  √ OK in 9ms
+
+  Tạo service center thiếu phone
+  Scenario()
+    I send post request "/service-center", {"name":"Service Center Test","address":"Q12, Ho Chi Minh City"}
+    » [Request] {"baseURL":"http://localhost:8080/api/service-center","method":"POST","data":{"name":"Service Center Test","address":"Q12, Ho Chi Minh City"},"headers":{"Content-Type":"application/json"}}
+    » [Response] Response error. Status code: 400
+    » [Response] {"message":"Số điện thoại là bắt buộc"}
+    I see response code is 400
+  √ OK in 10ms
+
+
+  OK  | 26 passed   // 567ms
+
+STDERR:
+

@@ -58,7 +58,7 @@ export default function VehicleDataTable({
       try {
         setLoadingUsers(true);
         const response = await getAllUsers({ limit: VERY_BIG_NUMBER, role: UserRole.User });
-        setUsers(response.data);
+        setUsers(response);
       } catch (error) {
         console.error("Failed to load users:", error);
         toast.error("Không thể tải danh sách người dùng");

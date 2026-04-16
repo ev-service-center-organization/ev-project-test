@@ -1,4 +1,4 @@
-import WorkOrder from '../models/workOrder.js';
+import WorkOrder from '../models/workorder.js';
 import ChecklistItem from '../models/checklistItem.js';
 import { Op } from 'sequelize';
 import sequelize from '../config/db.js';

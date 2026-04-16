@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 // 👇 1. Import đúng file AppSidebar bạn vừa tìm thấy
 // (Lưu ý: Bạn kiểm tra xem file AppSidebar.tsx nằm ở đâu để sửa đường dẫn cho đúng nhé)
@@ -43,9 +44,11 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <AdminLayoutContent>
-        {children}
-      </AdminLayoutContent>
+      <ProtectedRoute>
+        <AdminLayoutContent>
+          {children}
+        </AdminLayoutContent>
+      </ProtectedRoute>
     </SidebarProvider>
   );
 }

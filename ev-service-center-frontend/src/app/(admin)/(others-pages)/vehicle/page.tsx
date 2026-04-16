@@ -67,10 +67,13 @@ export default function VehiclePage() {
         }
 
         const data = await getVehicles(searchParams);
+        const vehiclesData = Array.isArray(data)
+          ? data
+          : data.data || [];
 
-        setVehicles(data.data as Vehicle[]);
-        setTotalItems(data.total);
-        setTotalPages(data.totalPages);
+        setVehicles(vehiclesData as Vehicle[]);
+        setTotalItems(Array.isArray(data) ? vehiclesData.length : data.total ?? vehiclesData.length);
+        setTotalPages(Array.isArray(data) ? 1 : data.totalPages ?? 1);
       } catch (e) {
         toast.error(getErrorMessage(e, "Không thể tải danh sách xe"));
       } finally {

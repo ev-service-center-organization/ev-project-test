@@ -1,24 +1,56 @@
-import 'dotenv/config';
-import app, { sequelize } from './src/app.js';
+import axios from 'axios';
 
-const PORT = process.env.PORT || 5002;
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://auth-service:5001';
+const AUTH_INTERNAL_TOKEN = process.env.AUTH_INTERNAL_TOKEN || '';
+const VEHICLE_SERVICE_URL = process.env.VEHICLE_SERVICE_URL || 'http://vehicle-service:5006';
+const NOTIFICATION_SERVICE_URL = process.env.NOTIFICATION_SERVICE_URL || 'http://notification-service:5005';
 
-const startServer = async () => {
+const authHeaders = AUTH_INTERNAL_TOKEN ? { Authorization: `Bearer ${AUTH_INTERNAL_TOKEN}` } : {};
+
+export const userClient = {
+  async getUserById(userId) {
     try {
-        await sequelize.authenticate();
-        console.log('✅ Đã thông kết nối với MySQL (Pass: 1234)!');
-
-        // force: true sẽ xóa bảng cũ (nếu có) và tạo lại bảng mới hoàn toàn
-        await sequelize.sync({ force: true }); 
-        console.log('✅ Bảng "appointments" đã được xây lại xong!');
-
-        app.listen(PORT, () => {
-            console.log(`🚀 Booking Service running on port ${PORT}`);
-        });
+      const response = await axios.get(`${AUTH_SERVICE_URL}/api/auth/users/${userId}`, {
+        headers: authHeaders
+      });
+      return response.data.data || response.data;
     } catch (error) {
-        console.error('❌ Lỗi khởi động:', error.message);
-        process.exit(1);
+      console.error('Error fetching user:', error?.message || error);
+      return null;
     }
+  },
+
+  async getUsersByIds(userIds) {
+    const promises = userIds.map(id => this.getUserById(id));
+    return Promise.all(promises);
+  }
 };
 
-startServer();
+export const vehicleClient = {
+  async getVehicleById(vehicleId) {
+    try {
+      const response = await axios.get(`${VEHICLE_SERVICE_URL}/api/vehicle/${vehicleId}`);
+      return response.data.data || response.data;
+    } catch (error) {
+      console.error('Error fetching vehicle:', error?.message || error);
+      return null;
+    }
+  },
+
+  async getVehiclesByIds(vehicleIds) {
+    const promises = vehicleIds.map(id => this.getVehicleById(id));
+    return Promise.all(promises);
+  }
+};
+
+export const notificationClient = {
+  async createNotification(payload) {
+    try {
+      const response = await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notification`, payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating notification:', error?.message || error);
+      return null;
+    }
+  }
+};

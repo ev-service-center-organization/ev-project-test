@@ -18,6 +18,6 @@ export interface IDashboardStatistic {
 }
 
 export const getDashboardStats = async (): Promise<IDashboardStatistic> => {
-  const res = await httpClient.get<{ data: IDashboardStatistic; message: string }>("/api/finance/stats/dashboard");
-  return res.data.data;
+  const res = await httpClient.get<{ data?: IDashboardStatistic; message?: string }>("/api/finance/stats/dashboard");
+  return (res.data.data ?? res.data) as IDashboardStatistic;
 };

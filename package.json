@@ -1,0 +1,28 @@
+{
+  "name": "ev-project-test",
+  "version": "1.0.0",
+  "description": "Thành viên:\r   - Nguyễn Tấn Cường (NT)\r   - Nguyễn Thị Thùy Trang\r   - Huỳnh Duy Thiện\r   - Lê Thế Khang\r   - Võ Anh Quốc",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ev-service-center-organization/ev-project-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ev-service-center-organization/ev-project-test/issues"
+  },
+  "homepage": "https://github.com/ev-service-center-organization/ev-project-test#readme",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "codeceptjs": "^3.7.8",
+    "playwright": "^1.59.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}

@@ -47,8 +47,70 @@ export const getInvoiceByAppointmentId = async (req, res) => {
   }
 };
 
+export const getInvoiceById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const invoice = await Invoice.findByPk(id, { include: Payment });
+
+    if (!invoice) {
+      return res.status(404).json({ error: 'Invoice not found' });
+    }
+
+    res.status(200).json(invoice);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const INVOICE_STATUS_VALUES = ["pending", "paid", "overdue", "cancelled"];
+
+function validateInvoicePayload(payload, isUpdate = false) {
+  const errors = [];
+  const { customerId, amount, dueDate, status } = payload;
+
+  if (!isUpdate || Object.prototype.hasOwnProperty.call(payload, 'customerId')) {
+    if (customerId === undefined || customerId === null || Number(customerId) <= 0) {
+      errors.push('customerId is required and must be greater than 0');
+    }
+  }
+
+  if (!isUpdate || Object.prototype.hasOwnProperty.call(payload, 'amount')) {
+    if (amount === undefined || amount === null || Number(amount) <= 0) {
+      errors.push('amount is required and must be greater than 0');
+    }
+  }
+
+  if (!isUpdate || Object.prototype.hasOwnProperty.call(payload, 'dueDate')) {
+    if (!dueDate) {
+      errors.push('dueDate is required');
+    } else {
+      const parsedDate = new Date(dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (Number.isNaN(parsedDate.getTime())) {
+        errors.push('dueDate must be a valid date');
+      } else if (parsedDate < today) {
+        errors.push('dueDate cannot be in the past');
+      }
+    }
+  }
+
+  if (status !== undefined && status !== null) {
+    if (!INVOICE_STATUS_VALUES.includes(status)) {
+      errors.push(`status must be one of ${INVOICE_STATUS_VALUES.join(', ')}`);
+    }
+  }
+
+  return errors;
+}
+
 export const createInvoice = async (req, res) => {
   try {
+    const errors = validateInvoicePayload(req.body, false);
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
     const { customerId, amount, dueDate, description, appointmentId } = req.body;
     const invoice = await Invoice.create({ 
       customerId, 
@@ -59,6 +121,43 @@ export const createInvoice = async (req, res) => {
       status: 'pending'
     });
     res.status(201).json(invoice);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateInvoice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const invoice = await Invoice.findByPk(id);
+
+    if (!invoice) {
+      return res.status(404).json({ error: 'Invoice not found' });
+    }
+
+    const errors = validateInvoicePayload(req.body, true);
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    await invoice.update(req.body);
+    res.status(200).json(invoice);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const deleteInvoice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const invoice = await Invoice.findByPk(id);
+
+    if (!invoice) {
+      return res.status(404).json({ error: 'Invoice not found' });
+    }
+
+    await invoice.destroy();
+    res.status(200).json({ message: 'Invoice deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

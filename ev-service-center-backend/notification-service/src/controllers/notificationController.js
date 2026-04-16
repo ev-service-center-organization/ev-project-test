@@ -112,8 +112,32 @@ export const getNotificationsByUser = async (req, res) => {
   }
 };
 
+function validateNotificationPayload(payload) {
+  const errors = [];
+  const { userId, message, type } = payload;
+
+  if (userId === undefined || userId === null || Number(userId) <= 0) {
+    errors.push('userId is required and must be greater than 0');
+  }
+
+  if (!message || typeof message !== 'string' || message.trim().length === 0) {
+    errors.push('message is required and must be a non-empty string');
+  }
+
+  if (!type || typeof type !== 'string' || type.trim().length === 0) {
+    errors.push('type is required and must be a non-empty string');
+  }
+
+  return errors;
+}
+
 export const createNotification = async (req, res) => {
   try {
+    const errors = validateNotificationPayload(req.body);
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
     const notification = await Notification.create(req.body);
     res.status(201).json(notification);
   } catch (err) {

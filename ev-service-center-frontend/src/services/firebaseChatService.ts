@@ -26,12 +26,14 @@ export interface ChatMessage {
 export const sendMessage = async (roomId: string, text: string, sender: { id: number, role: string, name: string, email: string }) => {
   if (!roomId || !text.trim()) return;
 
+  const normalizedRole = sender.role?.toString().toUpperCase() === "ADMIN" ? "ADMIN" : "USER";
+
   try {
     // A. Lưu tin nhắn vào collection con
     await addDoc(collection(db, "chats", roomId, "messages"), {
       text,
       senderId: sender.id,
-      senderRole: sender.role,
+      senderRole: normalizedRole,
       senderName: sender.name,
       createdAt: serverTimestamp(),
     });
@@ -43,7 +45,7 @@ export const sendMessage = async (roomId: string, text: string, sender: { id: nu
       roomId: roomId
     };
 
-    if (sender.role === "user") {
+    if (normalizedRole === "USER") {
       roomData.customerName = sender.name;
       roomData.customerEmail = sender.email;
     }

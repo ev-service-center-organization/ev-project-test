@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 const API_GATEWAY_URL = process.env.API_GATEWAY_URL;
+const AUTH_INTERNAL_TOKEN = process.env.AUTH_INTERNAL_TOKEN || '';
+const authHeaders = AUTH_INTERNAL_TOKEN ? { Authorization: `Bearer ${AUTH_INTERNAL_TOKEN}` } : {};
 
 export const bookingClient = {
     async getAppointmentById(appointmentId) {
@@ -39,7 +41,9 @@ export const vehicleClient = {
 export const userClient = {
     async getUserById(userId) {
         try {
-            const response = await axios.get(`${API_GATEWAY_URL}/api/auth/users/${userId}`);
+            const response = await axios.get(`${API_GATEWAY_URL}/api/auth/users/${userId}`, {
+                headers: authHeaders
+            });
             return response.data.data || response.data;
         } catch (error) {
             console.error('Error fetching user:', error.message);

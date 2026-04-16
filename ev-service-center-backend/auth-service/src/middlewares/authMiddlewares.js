@@ -16,6 +16,13 @@ export const authenticate = (req, res, next) => {
 
   const token = parts[1];
 
+  // 2a. Allow internal service token bypass
+  if (process.env.INTERNAL_SERVICE_TOKEN && token === process.env.INTERNAL_SERVICE_TOKEN) {
+    req.userId = null;
+    req.userRole = 'service';
+    return next();
+  }
+
   // 3. Verify token
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
@@ -34,7 +41,7 @@ export const authenticate = (req, res, next) => {
 }; 
 
 export const authorizeAdmin = (req, res, next) => {
-  if (req.userRole !== "admin") {
+  if (req.userRole !== "admin" && req.userRole !== "service") {
     return res.status(403).json({
       message: "Forbidden: Admin only"
     });

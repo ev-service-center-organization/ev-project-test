@@ -92,9 +92,19 @@ export const refreshToken = async (data: RefreshTokenRequest): Promise<RefreshTo
     return res.data;
 };
 
-export const getAllUsers = async (params?: UserListParams): Promise<UserListResponse> => {
+export const getAllUsers = async (params?: UserListParams): Promise<User[]> => {
     const res = await httpClient.get('/api/auth/users', { params });
-    return res.data;
+    const responseData = res.data;
+
+    if (Array.isArray(responseData)) {
+        return responseData;
+    }
+
+    if (Array.isArray(responseData?.data)) {
+        return responseData.data;
+    }
+
+    return [];
 };
 
 export const getUserById = async (id: number): Promise<User> => {

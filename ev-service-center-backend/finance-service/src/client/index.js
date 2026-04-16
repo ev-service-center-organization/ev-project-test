@@ -1,12 +1,14 @@
 import axios from 'axios';
 
 const API_GATEWAY_URL = process.env.API_GATEWAY_URL;
+const AUTH_INTERNAL_TOKEN = process.env.AUTH_INTERNAL_TOKEN || '';
+const authHeaders = AUTH_INTERNAL_TOKEN ? { Authorization: `Bearer ${AUTH_INTERNAL_TOKEN}` } : {};
 
 export const bookingClient = {
     async getDashboardStats() {
         try {
             const response = await axios.get(`${API_GATEWAY_URL}/api/booking/stats/booking`);
-            return response.data;
+            return { data: response.data };
         } catch (error) {
             console.error('Error fetching booking dashboard stats:', error.message);
             throw new Error('Failed to fetch booking dashboard stats');
@@ -111,7 +113,9 @@ export const inventoryClient = {
 export const authClient = {
     async getUserById(userId) {
         try {
-            const response = await axios.get(`${API_GATEWAY_URL}/api/auth/users/${userId}`);
+            const response = await axios.get(`${API_GATEWAY_URL}/api/auth/users/${userId}`, {
+                headers: authHeaders
+            });
             return response.data.data || response.data;
         } catch (error) {
             console.error('Error fetching user:', error.message);
@@ -132,8 +136,10 @@ export const authClient = {
 
     async getUserStats() {
         try {
-            const response = await axios.get(`${API_GATEWAY_URL}/api/auth/stats/users`);
-            return response.data;
+            const response = await axios.get(`${API_GATEWAY_URL}/api/auth/stats/users`, {
+                headers: authHeaders
+            });
+            return { data: response.data };
         } catch (error) {
             console.error('Error fetching user stats:', error.message);
             throw new Error('Failed to fetch user stats');

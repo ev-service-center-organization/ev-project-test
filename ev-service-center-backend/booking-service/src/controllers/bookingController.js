@@ -262,10 +262,65 @@ export const getAppointmentsByUserId = async (req, res) => {
 
 export const createAppointment = async (req, res) => {
   try {
-    const vehicle = await vehicleClient.getVehicleById(req.body.vehicleId);
+    const {
+      userId,
+      serviceCenterId,
+      timeSlot,
+      date,
+      startTime,
+      endTime,
+      notes,
+      createdById
+    } = req.body;
+
+    if (userId == null) {
+      return res.status(400).json({ message: 'Missing userId' });
+    }
+
+    if (serviceCenterId == null) {
+      return res.status(400).json({ message: 'Missing serviceCenterId' });
+    }
+
+    if (timeSlot == null || timeSlot === '') {
+      return res.status(400).json({ message: 'Missing timeSlot' });
+    }
+
+    if (timeSlot.length > 50) {
+      return res.status(400).json({ message: 'timeSlot too long' });
+    }
+
+    if (startTime == null) {
+      return res.status(400).json({ message: 'Missing startTime' });
+    }
+
+    if (date == null) {
+      return res.status(400).json({ message: 'Missing date' });
+    }
+
+    const dateValue = new Date(date);
+    if (isNaN(dateValue.getTime())) {
+      return res.status(400).json({ message: 'Invalid date format' });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (dateValue < today) {
+      return res.status(400).json({ message: 'Date must not be in the past' });
+    }
+
+    if (notes && notes.length > 500) {
+      return res.status(400).json({ message: 'Notes too long' });
+    }
+
+    const user = await userClient.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const appointment = await Appointment.create({
       ...req.body,
-      userId: vehicle.userId,
+      userId,
+      createdById: createdById || userId
     });
     const appointmentWithDetails = await getAppointmentDetails(appointment);
 
@@ -276,6 +331,7 @@ export const createAppointment = async (req, res) => {
     );
 
     res.status(201).json({
+      ...appointmentWithDetails,
       data: appointmentWithDetails,
       message: 'Appointment created successfully'
     });
@@ -304,6 +360,7 @@ export const updateAppointment = async (req, res) => {
     }
 
     res.status(200).json({
+      ...appointmentWithDetails,
       data: appointmentWithDetails,
       message: 'Appointment updated successfully'
     });
