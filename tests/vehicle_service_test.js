@@ -1,12 +1,27 @@
 // vehicle_service_test.js
 const vehicleHelper = require('../helpers/vehicleHelpers');
 
-Feature('Vehicle Service - 25 Comprehensive Test Cases');
+Feature('Vehicle Service - 55 Comprehensive & BVA Test Cases');
 
 Before(async ({ I }) => {
     // Tự động Login và thiết lập Header Token trước mỗi Test Case
     await vehicleHelper.authenticate(I);
 });
+const generatePlateByLength = (length) => {
+    if (length < 7) return '51A123'; // Cố tình sai định dạng/ngắn
+    const chars = "0123456789";
+    let result = "59A-";
+    for (let i = 0; i < length - 4; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
+const generateDate = (yearsOffset = 0, daysOffset = 0) => {
+    let d = new Date();
+    d.setFullYear(d.getFullYear() + yearsOffset);
+    d.setDate(d.getDate() + daysOffset);
+    return d.toISOString().split('T')[0];
+};
 
 // ==========================================
 // 🔹 TẠO XE
@@ -219,4 +234,174 @@ Scenario('25. Xóa xe không tồn tại', async ({ I }) => {
     // Cố tình xóa lại ID đã xóa ở TC 23
     const { currentVehicleId } = vehicleHelper.getStoredData();
     await vehicleHelper.deleteVehicle(I, currentVehicleId, 404);
+});
+// ==========================================
+// 🔹 PHẦN 2: 30 TEST CASES BVA (Ranh giới dữ liệu)
+// ==========================================
+
+// --- BVA: License Plate ---
+Scenario('26. BVA - Biển số ngắn hơn quy định (6 ký tự)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: generatePlateByLength(6), brand: 'Toyota', model: 'Camry', year: 2020, userId: currentUserId }, 400);
+});
+
+Scenario('27. BVA - Biển số có độ dài tối thiểu (7 ký tự)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: generatePlateByLength(7), brand: 'Toyota', model: 'Camry', year: 2020, userId: currentUserId }, 201);
+});
+
+Scenario('28. BVA - Biển số có độ dài bình thường (8 ký tự)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: generatePlateByLength(8), brand: 'Toyota', model: 'Camry', year: 2020, userId: currentUserId }, 201);
+});
+
+Scenario('29. BVA - Biển số có độ dài tối đa (9 ký tự)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: generatePlateByLength(9), brand: 'Toyota', model: 'Camry', year: 2020, userId: currentUserId }, 201);
+});
+
+Scenario('30. BVA - Biển số dài hơn quy định (10 ký tự)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: generatePlateByLength(10), brand: 'Toyota', model: 'Camry', year: 2020, userId: currentUserId }, 400);
+});
+
+// --- BVA: Brand ---
+Scenario('31. BVA - Thương hiệu để trống trường bắt buộc', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: '', model: 'Camry', year: 2020, userId: currentUserId }, 400);
+});
+
+Scenario('32. BVA - Thương hiệu có 1 ký tự', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'T', model: 'Camry', year: 2020, userId: currentUserId }, 201);
+});
+
+
+Scenario('33. BVA - Thương hiệu dài tối đa (50 ký tự)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'A'.repeat(50), model: 'Camry', year: 2020, userId: currentUserId }, 201);
+});
+
+Scenario('34. BVA - Thương hiệu giá trị dài vượt quá giới hạn (51 ký tự)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'A'.repeat(51), model: 'Camry', year: 2020, userId: currentUserId }, 400);
+});
+
+// --- BVA: Model ---
+Scenario('35. BVA - Mẫu xe để trống trường tùy chọn', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: '', year: 2020, userId: currentUserId }, 400); // Hoặc 201 tùy Backend
+});
+
+Scenario('36. BVA - Mẫu xe có 1 ký tự', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'C', year: 2020, userId: currentUserId }, 201);
+});
+
+Scenario('37. BVA - Mẫu xe dài tối đa (50 ký tự)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'M'.repeat(50), year: 2020, userId: currentUserId }, 201);
+});
+
+Scenario('38. BVA - Mẫu xe quá dài gây tràn dữ liệu (51 ký tự)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'M'.repeat(51), year: 2020, userId: currentUserId }, 400);
+});
+
+// --- BVA: Year ---
+Scenario('39. BVA - Năm sản xuất dưới biên cho phép (1899)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'Camry', year: 1899, userId: currentUserId }, 400);
+});
+
+Scenario('40. BVA - Năm sản xuất nhỏ nhất hợp lệ (1900)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'Camry', year: 1900, userId: currentUserId }, 201);
+});
+
+
+Scenario('41. BVA - Năm sản xuất lớn nhất hợp lệ (2026)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'Camry', year: 2026, userId: currentUserId }, 201);
+});
+
+Scenario('42. BVA - Năm sản xuất vượt biên tương lai (2027)', async ({ I }) => {
+    const { currentUserId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'Camry', year: 2027, userId: currentUserId }, 400);
+});
+
+// --- BVA: User ID ---
+Scenario('43. BVA - User ID là số âm (-1)', async ({ I }) => {
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'Camry', year: 2020, userId: -1 }, 400);
+});
+
+Scenario('44. BVA - User ID nhỏ nhất hợp lệ (1)', async ({ I }) => {
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'Camry', year: 2020, userId: 1 }, 201);
+});
+
+
+Scenario('45. BVA - User ID lớn nhất hợp lệ (2147483647)', async ({ I }) => {
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'Camry', year: 2020, userId: 2147483647 }, 201);
+});
+
+Scenario('46. BVA - User ID sai định dạng chữ ("A")', async ({ I }) => {
+    await vehicleHelper.createVehicle(I, { licensePlate: vehicleHelper.generateRandomPlate(), brand: 'Toyota', model: 'Camry', year: 2020, userId: "A" }, 400);
+});
+
+// --- BVA: Reminder Message (Hoàn thiện đủ 30 TCs BVA) ---
+Scenario('47. BVA Reminder - Message rỗng', async ({ I }) => {
+    let { currentVehicleId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createReminder(I, currentVehicleId, { message: "", date: vehicleHelper.getFutureDate(7) }, 400);
+});
+
+Scenario('48. BVA Reminder - Message 1 ký tự', async ({ I }) => {
+    let { currentVehicleId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createReminder(I, currentVehicleId, { message: "A", date: vehicleHelper.getFutureDate(7) }, 201);
+});
+
+Scenario('49. BVA Reminder - Message thông thường', async ({ I }) => {
+    let { currentVehicleId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createReminder(I, currentVehicleId, { message: "Kiểm tra và thay nhớt", date: vehicleHelper.getFutureDate(7) }, 201);
+});
+
+Scenario('50. BVA Reminder - Message tối đa 255 ký tự', async ({ I }) => {
+    let { currentVehicleId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createReminder(I, currentVehicleId, { message: "A".repeat(255), date: vehicleHelper.getFutureDate(7) }, 201);
+});
+
+Scenario('51. BVA Reminder - Message vượt giới hạn 256 ký tự', async ({ I }) => {
+    let { currentVehicleId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createReminder(I, currentVehicleId, { message: "A".repeat(256), date: vehicleHelper.getFutureDate(7) }, 400);
+});
+Scenario('52. BVA Reminder - Date: Kiểm tra ngày ở quá khứ', async ({ I }) => {
+    let { currentVehicleId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createReminder(I, currentVehicleId, { 
+        message: "Kiểm tra định kỳ", 
+        date: generateDate(-1, 0) // Lùi về 1 năm trước
+    }, 400);
+});
+
+Scenario('53. BVA Reminder - Date: Kiểm tra ngày hôm nay', async ({ I }) => {
+    let { currentVehicleId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createReminder(I, currentVehicleId, { 
+        message: "Kiểm tra định kỳ", 
+        date: generateDate(0, 0) // Ngày hôm nay
+    }, 201);
+});
+
+
+Scenario('54. BVA Reminder - Date: Kiểm tra ngày tối đa (tương lai xa không quá 100 năm)', async ({ I }) => {
+    let { currentVehicleId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createReminder(I, currentVehicleId, { 
+        message: "Kiểm tra định kỳ", 
+        date: generateDate(100, 0) // Cộng đúng 100 năm
+    }, 201);
+});
+
+Scenario('55. BVA Reminder - Date: Kiểm tra ngày vượt quá tối đa (tương lai xa quá 100 năm)', async ({ I }) => {
+    let { currentVehicleId } = vehicleHelper.getStoredData();
+    await vehicleHelper.createReminder(I, currentVehicleId, { 
+        message: "Kiểm tra định kỳ", 
+        date: generateDate(101, 0) // Vượt ngưỡng 100 năm (Cộng 101 năm)
+    }, 400);
 });
