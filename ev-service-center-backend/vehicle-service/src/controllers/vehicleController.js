@@ -28,7 +28,6 @@ export const getAllVehicles = async (req, res) => {
 
     const whereClause = {};
 
-    // 🔥 LOGIC PHÂN QUYỀN BẢO MẬT 🔥
     if (!currentUser) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -125,9 +124,24 @@ export const getVehiclesByUserId = async (req, res) => {
 
 export const createVehicle = async (req, res) => {
   try {
-    const { userId, brand, model, year } = req.body;
+    // 1. Lấy thông tin user hiện tại từ Token
+    const currentUser = req.user; 
+    
+    if (!currentUser) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-    // --- Validation cho Brand ---
+    // Đổi const thành let để có thể ghi đè userId nếu người tạo là khách hàng
+    let { userId, brand, model, year, licensePlate } = req.body;
+
+   
+    if (currentUser.role === 'user') {
+      // Nếu là Khách hàng (user): Ép buộc userId phải là ID của chính họ.
+      // Bỏ qua mọi giá trị userId giả mạo nào mà hacker cố tình gửi lên trong req.body
+      userId = currentUser.id;
+    }
+
+    // --- Validation cho Brand (Giữ nguyên) ---
     // TC 6 & 10: Không được null hoặc để trống
     if (brand === undefined || brand === null || String(brand).trim() === "") {
       return res.status(400).json({ message: "Brand is required and cannot be empty" });
@@ -137,7 +151,7 @@ export const createVehicle = async (req, res) => {
       return res.status(400).json({ message: "Brand name exceeds maximum length (50 characters)" });
     }
 
-    // --- Validation cho Model ---
+    // --- Validation cho Model (Giữ nguyên) ---
     // TC 11 & 15: Không được null hoặc để trống
     if (model === undefined || model === null || String(model).trim() === "") {
       return res.status(400).json({ message: "Model is required and cannot be empty" });
@@ -146,6 +160,9 @@ export const createVehicle = async (req, res) => {
     if (model.length > 50) {
       return res.status(400).json({ message: "Model name exceeds maximum length (50 characters)" });
     }
+
+    // --- Validation cho userId (Giữ nguyên logic) ---
+    // Lúc này userId có thể là từ Admin chọn (nếu role admin) HOẶC là id của chính khách hàng (nếu role user)
     if (userId === undefined || userId === null || userId === "") {
       return res.status(400).json({ message: "userId is required" });
     }
@@ -162,8 +179,13 @@ export const createVehicle = async (req, res) => {
       return res.status(400).json({ message: "userId must be a positive integer" });
     }
 
-    // Nếu hợp lệ, tiến hành tạo mới
-    const newVehicle = await Vehicle.create(req.body);
+
+    // QUAN TRỌNG: Ghi đè lại userId vào object lưu xuống DB để đảm bảo tính an toàn
+    const newVehicle = await Vehicle.create({
+      ...req.body,
+      userId: userIdNum 
+    });
+
     res.status(201).json({
       data: newVehicle,
       message: 'Vehicle created successfully'

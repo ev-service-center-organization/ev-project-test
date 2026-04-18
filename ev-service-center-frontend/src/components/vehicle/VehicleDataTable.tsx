@@ -15,8 +15,9 @@ import { UserRole } from "@/constants/user.constant";
 import { VERY_BIG_NUMBER } from "@/constants/common";
 import SearchableDataTable from "../common/SearchableDataTable";
 import { PaginationInfo } from "../common/Pagination";
-
+import { useAuth } from "@/hooks/useAuth";
 interface VehicleDataTableProps {
+  
   onRefresh: () => void;
   items: Vehicle[];
   headers: Header[];
@@ -29,6 +30,7 @@ interface VehicleDataTableProps {
 }
 
 export default function VehicleDataTable({ 
+  
   headers, 
   items, 
   onRefresh,
@@ -39,6 +41,7 @@ export default function VehicleDataTable({
   onPageChange, 
   onItemsPerPageChange 
 }: VehicleDataTableProps) {
+  const { user: currentUser } = useAuth(); // Lấy user đang đăng nhập
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -50,15 +53,24 @@ export default function VehicleDataTable({
     year: new Date().getFullYear(),
     userId: null,
   });
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen, openModal, closeModal } = useModal();const isCustomer = currentUser?.userRoles?.some(ur => ur.role.name === 'user');
+
 
   // Load users when component mounts
   useEffect(() => {
     const loadUsers = async () => {
       try {
         setLoadingUsers(true);
-        const response = await getAllUsers({ limit: 100, role: UserRole.User });
-        setUsers(response);
+        
+        if (isCustomer && currentUser) {
+          // Nếu là khách hàng: Chỉ hiển thị chính họ trong danh sách
+          setUsers([currentUser as unknown as User]);
+          setFormData(prev => ({ ...prev, userId: currentUser.id }));
+        } else {
+          // Nếu là Admin/Nhân viên: Tải toàn bộ như cũ
+          const response = await getAllUsers({ limit: 100, role: UserRole.User });
+          setUsers(response);
+        }
       } catch (error) {
         console.error("Failed to load users:", error);
         toast.error("Không thể tải danh sách người dùng");
@@ -68,7 +80,7 @@ export default function VehicleDataTable({
     };
 
     loadUsers();
-  }, []);
+  }, [isCustomer, currentUser]); // Thêm dependency
 
   // Reset form when modal closes
   useEffect(() => {
@@ -291,21 +303,29 @@ export default function VehicleDataTable({
                     className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
-                <div className="mb-3">
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Người dùng
-                  </label>
-                  <SingleSelect
-                    options={users.map(user => ({
-                      value: user.id.toString(),
-                      label: `${user.username || user.email} (${user.email ?? 'Không có email'})`
-                    }))}
-                    value={formData?.userId?.toString()}
-                    onChange={handleUserChange}
-                    placeholder={loadingUsers ? "Đang tải..." : "Chọn người dùng"}
-                    disabled={loadingUsers}
-                  />
-                </div>
+              <div className="mb-3">
+    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+      Người dùng
+    </label>
+    {isCustomer ? (
+      // Nếu là khách hàng: Hiển thị dạng text tĩnh (Read-only)
+      <div className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2.5 text-sm text-gray-500 flex items-center">
+        {currentUser?.username || currentUser?.email}
+      </div>
+    ) : (
+      // Nếu là Admin: Giữ nguyên Dropdown chọn
+      <SingleSelect
+        options={users.map(user => ({
+          value: user.id.toString(),
+          label: `${user.username || user.email} (${user.email ?? 'Không có email'})`
+        }))}
+        value={formData?.userId?.toString()}
+        onChange={handleUserChange}
+        placeholder={loadingUsers ? "Đang tải..." : "Chọn người dùng"}
+        disabled={loadingUsers}
+      />
+    )}
+  </div>
               </div>
           <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
             <button
