@@ -57,7 +57,7 @@ export default function VehicleDataTable({
     const loadUsers = async () => {
       try {
         setLoadingUsers(true);
-        const response = await getAllUsers({ limit: VERY_BIG_NUMBER, role: UserRole.User });
+        const response = await getAllUsers({ limit: 100, role: UserRole.User });
         setUsers(response);
       } catch (error) {
         console.error("Failed to load users:", error);
