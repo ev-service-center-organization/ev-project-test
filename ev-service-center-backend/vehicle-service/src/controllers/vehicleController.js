@@ -4,7 +4,11 @@ import { Op } from 'sequelize';
 
 export const getAllVehicles = async (req, res) => {
   try {
-    const { keyword, userId } = req.query;
+    // Không lấy userId từ req.query ngay từ đầu nữa để tránh bị ghi đè
+    const { keyword } = req.query; 
+    
+    // Lấy thông tin user hiện tại từ token (đã được middleware authenticate gán vào req.user)
+    const currentUser = req.user; 
     
     // Lấy giá trị limit từ query, mặc định là 10
     let limit = parseInt(req.query.limit);
@@ -23,9 +27,24 @@ export const getAllVehicles = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const whereClause = {};
-    if (userId) {
-      whereClause.userId = parseInt(userId);
+
+    // 🔥 LOGIC PHÂN QUYỀN BẢO MẬT 🔥
+    if (!currentUser) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
+
+    if (currentUser.role === 'user') {
+      // 1. Nếu là Khách hàng (role = 'user'): Ép buộc chỉ tìm xe có userId trùng với ID của họ
+      whereClause.userId = currentUser.id;
+    } else {
+      // 2. Nếu là Admin hoặc Nhân viên: 
+      // Có thể lấy toàn bộ, hoặc lọc theo một userId cụ thể nếu Frontend có truyền lên
+      if (req.query.userId) {
+        whereClause.userId = parseInt(req.query.userId);
+      }
+    }
+
+    // Xử lý tìm kiếm theo keyword (nếu có)
     if (keyword) {
       whereClause[Op.or] = [
         { licensePlate: { [Op.like]: `%${keyword}%` } },
@@ -35,7 +54,7 @@ export const getAllVehicles = async (req, res) => {
       ];
     }
 
-   const { rows, count } = await Vehicle.findAndCountAll({
+    const { rows, count } = await Vehicle.findAndCountAll({
       where: whereClause,
       include: Reminder,
       limit, // Sử dụng limit đã được xử lý

@@ -11,17 +11,23 @@ export const authenticate = (req, res, next) => {
   }
 
   // 3. Xác thực token
-  // Đảm bảo process.env.JWT_SECRET trong vehicle-service khớp với auth-service
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       console.error("JWT Verification Error:", err.message);
       return res.status(401).json({ message: "Unauthorized! Invalid or expired token." });
     }
 
-    // 4. Lưu thông tin user vào request để các controller sau có thể sử dụng
+    // 4. 🔥 QUAN TRỌNG: Gán thẳng toàn bộ decoded payload vào req.user 🔥
+    // Vì token bên Auth-service sinh ra có chứa { id, role } nên decoded sẽ có đủ
+    req.user = {
+      id: decoded.id,
+      role: decoded.role
+    };
+    
+    // Vẫn giữ lại req.userId phòng trường hợp các controller cũ của bạn đang dùng nó
     req.userId = decoded.id;
     
-    // 5. QUAN TRỌNG: Gọi next() để chuyển sang controller tiếp theo
+    // 5. Gọi next() để chuyển sang controller tiếp theo
     next();
   });
 };
