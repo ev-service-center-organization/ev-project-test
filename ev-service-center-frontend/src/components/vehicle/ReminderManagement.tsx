@@ -42,22 +42,55 @@ export default function ReminderManagement({ vehicleId, vehicleName }: ReminderM
     }
   }, [isOpen, vehicleId, fetchReminders]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Kiểm tra nhanh ở Frontend để tránh gọi API thừa
+    if (!formData.message || !formData.date) {
+      alert("Vui lòng nhập đầy đủ nội dung và ngày nhắc nhở");
+      return;
+    }
+
     if (isSubmitting) return;
 
     try {
       setIsSubmitting(true);
+      
+      // Gọi API thêm nhắc nhở
       await addReminder(vehicleId, formData);
+      
+      // NẾU THÀNH CÔNG: Sẽ chạy các dòng dưới đây
       toast.success("Thêm nhắc nhở thành công");
+      
+      // Xóa trắng dữ liệu trên form
       setFormData({
         vehicleId,
         message: "",
         date: "",
       });
+      // Tải lại danh sách
       fetchReminders();
-    } catch {
-      toast.error("Không thể thêm nhắc nhở");
+      
+    } catch (error: any) {
+      //  NẾU LỖI: Luồng chạy sẽ nhảy thẳng xuống đây, không xóa trắng form
+      
+      // In toàn bộ object lỗi ra tab Console (F12) để dễ dàng kiểm tra cấu trúc
+      console.error("Toàn bộ object lỗi từ API:", error);
+      
+      // 🔥 Moi câu thông báo lỗi bằng cách quét toàn bộ các tầng cấu trúc
+      const errorMsg = 
+        error?.response?.data?.message || // Dành cho Axios mặc định
+        error?.response?.message ||       // Dành cho một số Interceptor
+        error?.data?.message ||           // Dành cho trường hợp bóc sẵn data
+        error?.message ||                 // Lỗi cơ bản của JavaScript
+        "Không thể thêm nhắc nhở. Vui lòng thử lại."; // Dự phòng cuối cùng
+      
+      // Hiện Alert bắt người dùng nhấn OK (Không bao giờ bị giao diện đè lên)
+      alert("Hệ thống báo lỗi:\n" + errorMsg);
+      
+      // Vẫn hiện thêm Toast đỏ cho đồng bộ UI
+      toast.error(errorMsg, { duration: 5000 });
+      
     } finally {
       setIsSubmitting(false);
     }

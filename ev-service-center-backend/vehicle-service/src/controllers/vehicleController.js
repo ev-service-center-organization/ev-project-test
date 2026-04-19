@@ -280,12 +280,12 @@ export const addReminder = async (req, res) => {
     const hundredYearsLater = new Date();
     hundredYearsLater.setFullYear(today.getFullYear() + 100);
 
-    // 1. Kiểm tra ngày ở quá khứ (Min-)
+    // 1. Kiểm tra ngày ở quá khứ (Min-) - Giữ nguyên tiếng Anh cho Test Case
     if (inputDate < today) {
       return res.status(400).json({ message: "Date cannot be in the past" });
     }
 
-    // 2. Kiểm tra giới hạn 100 năm (Max+)
+    // 2. Kiểm tra giới hạn 100 năm (Max+) - Giữ nguyên tiếng Anh cho Test Case
     if (inputDate > hundredYearsLater) {
       return res.status(400).json({ message: "Date cannot exceed 100 years from now" });
     }
@@ -301,6 +301,14 @@ export const addReminder = async (req, res) => {
       message: 'Reminder created successfully'
     });
   } catch (err) {
+    // 🔥 Bổ sung bắt lỗi Validation từ tầng Database (nếu Model có các ràng buộc khác như thiếu message)
+    if (err.name === 'SequelizeValidationError') {
+      return res.status(400).json({ 
+        message: err.errors.map(e => e.message).join(', ') 
+      });
+    }
+
+    // Các lỗi hệ thống khác
     res.status(400).json({ message: err.message });
   }
 };
