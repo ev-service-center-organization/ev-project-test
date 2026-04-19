@@ -98,6 +98,16 @@ export const addPart = async (req, res) => {
       return res.status(400).json({ message: "Name and partNumber are required" });
     }
 
+    // ✅ FIX BVA_INV_3.1 [ES-126]: validate quantity không được âm
+    if (quantity < 0) {
+      return res.status(400).json({ message: "quantity must be greater than or equal to 0" });
+    }
+
+    // ✅ FIX BVA_INV_3.11 [ES-127]: validate minStock không được âm
+    if (minStock < 0) {
+      return res.status(400).json({ message: "minStock must be greater than or equal to 0" });
+    }
+
     // Check if partNumber already exists
     const existingPart = await Part.findOne({ where: { partNumber } });
     if (existingPart) {
