@@ -16,6 +16,7 @@ import { VERY_BIG_NUMBER } from "@/constants/common";
 import SearchableDataTable from "../common/SearchableDataTable";
 import { PaginationInfo } from "../common/Pagination";
 import { useAuth } from "@/hooks/useAuth";
+import { getErrorMessage } from "@/lib/utils";
 interface VehicleDataTableProps {
   
   onRefresh: () => void;
@@ -118,8 +119,12 @@ export default function VehicleDataTable({
     openModal();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Bật F12 (tab Console) để xem dữ liệu có gửi đi đúng không
+    console.log("Dữ liệu đang gửi đi:", formData); 
+
     if (isSubmitting) return;
 
     try {
@@ -131,10 +136,26 @@ export default function VehicleDataTable({
         await createVehicle({ ...formData, userId: formData.userId ?? (null as unknown as number) });
         toast.success("Thêm phương tiện thành công");
       }
+      
+      // Nếu thành công thì đóng Modal
       closeModal();
       onRefresh();
-    } catch {
-      toast.error(selectedVehicle?.id ? "Không thể cập nhật phương tiện" : "Không thể thêm phương tiện");
+      
+    } catch (error: any) {
+      // In lỗi ra F12 để DEV dễ debug
+      console.error("Lỗi bắt được từ API:", error); 
+      
+      // Lấy câu thông báo chi tiết từ Backend
+      const fallbackMsg = selectedVehicle?.id ? "Lỗi cập nhật phương tiện" : "Lỗi thêm phương tiện";
+      const errorMsg = error?.response?.data?.message || getErrorMessage(error, fallbackMsg) || fallbackMsg;
+      
+      // 1. Hiển thị Alert popup của trình duyệt (Đảm bảo không bao giờ bị đè)
+      alert("Hệ thống báo lỗi:\n" + errorMsg);
+      
+      // 2. Vẫn gọi Toast (để hệ thống đồng bộ UI)
+      toast.error(errorMsg, { duration: 5000 });
+      
+  
     } finally {
       setIsSubmitting(false);
     }
