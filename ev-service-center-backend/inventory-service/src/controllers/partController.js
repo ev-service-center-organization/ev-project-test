@@ -13,7 +13,13 @@ import {
 // Get all parts with pagination and filtering
 export const getParts = async (req, res) => {
   try {
-    const { page = PAGINATION_DEFAULTS.PAGE, limit = PAGINATION_DEFAULTS.LIMIT, search, minStock } = req.query;
+    // const { page = PAGINATION_DEFAULTS.PAGE, limit = PAGINATION_DEFAULTS.LIMIT, search, minStock } = req.query;
+    // const offset = (page - 1) * limit;
+
+    // ✅ FIX BVA_INV_1.1 [ES-128]: validate page & limit không được âm hoặc 0
+    const { search, minStock } = req.query;
+    const page  = Math.max(1, parseInt(req.query.page)  || PAGINATION_DEFAULTS.PAGE);
+    const limit = Math.max(1, parseInt(req.query.limit) || PAGINATION_DEFAULTS.LIMIT);
     const offset = (page - 1) * limit;
 
     // Build search conditions
@@ -96,6 +102,16 @@ export const addPart = async (req, res) => {
     // Validate required fields
     if (!name || !partNumber) {
       return res.status(400).json({ message: "Name and partNumber are required" });
+    }
+
+    // ✅ FIX BVA_INV_3.1 [ES-126]: validate quantity không được âm
+    if (quantity < 0) {
+      return res.status(400).json({ message: "quantity must be greater than or equal to 0" });
+    }
+
+    // ✅ FIX BVA_INV_3.11 [ES-127]: validate minStock không được âm
+    if (minStock < 0) {
+      return res.status(400).json({ message: "minStock must be greater than or equal to 0" });
     }
 
     // Check if partNumber already exists
