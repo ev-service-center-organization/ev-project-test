@@ -452,13 +452,19 @@ Scenario('BVA_WO_6.1 - price = 0 (biên dưới hợp lệ) → 201', async ({ I
   }, 201, false);
 });
 
-Scenario('BVA_WO_6.2 - price = -1 → 400 hoặc 201 (BUG)', async ({ I }) => {
+// ✅ Sau fix: BVA_WO_6.2 assert cứng
+Scenario('BVA_WO_6.2 - price = -1 → 400 @fixed', async ({ I }) => {
   const { currentWorkOrderId } = woHelper.getStoredData();
-  const res = await I.sendPostRequest(`/workorder/${currentWorkOrderId}/checklist`, {
-    task: 'BVA Neg Price', price: -1, completed: false,
+
+  await woHelper.addChecklistItem(I, currentWorkOrderId, {
+    task:      'BVA Neg Price',
+    price:     -1,
+    completed: false,
+  }, 400);
+
+  I.seeResponseContainsJson({
+    message: 'price must be greater than or equal to 0'
   });
-  // Failed theo excel: code không validate → 201 (BUG)
-  console.log(`[BVA_WO_6.2] price=-1 → HTTP ${res.status} (expect 400, BUG nếu 201)`);
 });
 
 Scenario('BVA_WO_6.3 - price = 0.01 (min dương hợp lệ) → 201', async ({ I }) => {

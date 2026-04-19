@@ -106,6 +106,12 @@ export const deleteWorkOrder = async (req, res) => {
 
 export const addChecklistItem = async (req, res) => {
   try {
+    // ✅ FIX BVA_WO_6.2 [ES-130]: validate price không được âm
+    const price = req.body.price ?? 0;
+    if (price < 0) {
+      return res.status(400).json({ message: "price must be greater than or equal to 0" });
+    }
+
     const item = await ChecklistItem.create({
       workOrderId: req.params.work_order_id,
       ...req.body,

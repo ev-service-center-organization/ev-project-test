@@ -196,31 +196,19 @@ Scenario('ITC_INV_5.1 - Xóa linh kiện không được sử dụng', async ({ 
 });
 
 Scenario('ITC_INV_5.2 - Xóa linh kiện đang dùng trong WO → 400', async ({ I }) => {
-  // Dùng partId đã tồn tại trong PartsUsage (cần có data thực)
-  // Thay số 1 bằng ID part thực tế đang dùng trong work order
-  await inventoryHelper.deletePart(I, 1, 400);
+  // Tạo part, tạo WO, tạo PartsUsage liên kết → rồi mới xóa
+  // Hoặc skip nếu không có data: dùng xocept skip
+  const listRes = await inventoryHelper.getParts(I);
+  const usedPart = listRes.data.find(p => p.PartsUsages?.length > 0);
+  if (!usedPart) {
+    console.log('[SKIP] Không có part đang dùng trong WO');
+    return;
+  }
+  await inventoryHelper.deletePart(I, usedPart.id, 400);
   I.seeResponseContainsJson({
-    message: 'Cannot delete part that is being used in work orders',
+    message: 'Cannot delete part that is being used in work orders'
   });
 });
-// Scenario('ITC_INV_5.2 - Xóa linh kiện đang dùng trong WO → 400', async ({ I }) => {
-//   // Tìm part đang có trong PartsUsage từ DB thực tế
-//   const listRes = await inventoryHelper.getParts(I, '', 200);
-//   const parts = listRes?.data || [];
-
-//   // Tìm part có StockLogs (đã được sử dụng)
-//   const usedPart = parts.find(p => p.StockLogs?.length > 0);
-
-//   if (!usedPart) {
-//     console.log('[ITC_INV_5.2] SKIP: Không có part nào đang dùng trong WO trong DB hiện tại');
-//     return;
-//   }
-
-//   await inventoryHelper.deletePart(I, usedPart.id, 400);
-//   I.seeResponseContainsJson({
-//     message: 'Cannot delete part that is being used in work orders',
-//   });
-// });
 
 // ═══════════════════════════════════════════════════════════
 // INV_F6 – Cập Nhật Tồn Kho (updateStock)
@@ -342,13 +330,17 @@ Scenario('ITC_INV_8.2 - Lấy thống kê theo năm cụ thể (2025)', async ({
 // BVA – INV_F3 addPart | Biên: quantity
 // ═══════════════════════════════════════════════════════════
 
-Scenario('BVA_INV_3.1 - quantity = -1 (min-1) → 400 hoặc 201 (BUG)', async ({ I }) => {
-  const res = await I.sendPostRequest('/inventory/parts', {
-    name: 'BVA Part', partNumber: `PN-BVA1-${Date.now()}`, quantity: -1,
+// ✅ Sau fix: BVA_INV_3.1 assert cứng
+Scenario('BVA_INV_3.1 - quantity = -1 (min-1) → 400 @fixed', async ({ I }) => {
+  await inventoryHelper.addPart(I, {
+    name:       'BVA Part',
+    partNumber: `PN-BVA1-${Date.now()}`,
+    quantity:   -1,
+  }, 400);
+
+  I.seeResponseContainsJson({
+    message: 'quantity must be greater than or equal to 0'
   });
-  // Failed theo excel: code không chặn → 201 (BUG)
-  // Ghi nhận hành vi thực tế, không dùng seeResponseCodeIs cứng
-  console.log(`[BVA_INV_3.1] quantity=-1 → HTTP ${res.status} (expect 400, BUG nếu 201)`);
 });
 
 Scenario('BVA_INV_3.2 - quantity = 0 (min) → 201, không tạo StockLog', async ({ I }) => {
@@ -480,9 +472,13 @@ Scenario('BVA_INV_6.5 - quantity = -1 → 400', async ({ I }) => {
 
 // ─────── BVA INV_F1 getParts | page & limit ───────────────
 
-Scenario('BVA_INV_1.1 - page = 0 → offset âm (BUG: 500 hoặc data sai)', async ({ I }) => {
-  const res = await I.sendGetRequest('/inventory/parts?page=0&limit=10');
-  console.log(`[BVA_INV_1.1] page=0 → HTTP ${res.status} (expect lỗi, đang là BUG)`);
+// ✅ Sau fix: BVA_INV_1.1 assert cứng
+Scenario('BVA_INV_1.1 - page = 0 → tự normalize về page=1 @fixed', async ({ I }) => {
+  const res = await inventoryHelper.getParts(I, '?page=0&limit=10');
+
+  // Sau fix: normalize page=0 → page=1 → HTTP 200
+  I.seeResponseContainsJson({ page: 1 });
+  I.assertFalse(res.hasPrev, 'hasPrev phải = false');
 });
 
 Scenario('BVA_INV_1.2 - page = 1 (min hợp lệ) → 200, hasPrev=false', async ({ I }) => {
@@ -514,13 +510,15 @@ Scenario('BVA_INV_3.10 - minStock = 0 (biên dưới hợp lệ) → 201', async
   if (res.data?.id) await inventoryHelper.deletePart(I, res.data.id);
 });
 
-Scenario('BVA_INV_3.11 - minStock = -1 (dưới biên) → 400 hoặc 201 (BUG)', async ({ I }) => {
-  const res = await I.sendPostRequest('/inventory/parts', {
-    name: 'BVA minStockNeg', partNumber: `MSN-${Date.now()}`, minStock: -1,
+// ✅ Sau fix: BVA_INV_3.11 assert cứng
+Scenario('BVA_INV_3.11 - minStock = -1 (dưới biên) → 400 @fixed', async ({ I }) => {
+  await inventoryHelper.addPart(I, {
+    name:       'BVA minStockNeg',
+    partNumber: `MSN-${Date.now()}`,
+    minStock:   -1,
+  }, 400);
+
+  I.seeResponseContainsJson({
+    message: 'minStock must be greater than or equal to 0'
   });
-  // Failed theo excel: code không validate → 201 (BUG)
-  console.log(`[BVA_INV_3.11] minStock=-1 → HTTP ${res.status} (expect 400, BUG nếu 201)`);
-  if (res.status === 201 && res.data?.data?.id) {
-    await inventoryHelper.deletePart(I, res.data.data.id);
-  }
 });
