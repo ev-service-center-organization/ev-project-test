@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 import Bell from "@/icons/bell.svg";
 import Plus from "@/icons/plus.svg";
 import Alert from "@/icons/alert.svg";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ReminderManagementProps {
   vehicleId: number;
@@ -23,6 +24,31 @@ export default function ReminderManagement({ vehicleId, vehicleName }: ReminderM
     date: "",
   });
   const { isOpen, openModal, closeModal } = useModal();
+
+  // ==========================================
+  // 🔥 PHẦN THÊM MỚI: LOGIC ĐÁNH DẤU HOÀN THÀNH
+  // ==========================================
+  const { user: currentUser } = useAuth();
+  // Kiểm tra xem có phải khách hàng không (Khách hàng sẽ không thấy nút tick)
+  const isCustomer = currentUser?.userRoles?.some((ur: any) => ur.role.name === 'user');
+  
+  const [completedIds, setCompletedIds] = useState<number[]>([]);
+
+  // Lấy trạng thái đã hoàn thành từ LocalStorage khi mở form
+  useEffect(() => {
+    const saved = localStorage.getItem('completed_reminders');
+    if (saved) {
+      setCompletedIds(JSON.parse(saved));
+    }
+  }, []);
+
+  // Xử lý khi nhấn nút tick xanh
+  const handleMarkCompleted = (id: number) => {
+    const updatedIds = [...completedIds, id];
+    setCompletedIds(updatedIds);
+    localStorage.setItem('completed_reminders', JSON.stringify(updatedIds));
+  };
+  // ==========================================
 
   const fetchReminders = useCallback(async () => {
     try {
@@ -42,7 +68,7 @@ export default function ReminderManagement({ vehicleId, vehicleName }: ReminderM
     }
   }, [isOpen, vehicleId, fetchReminders]);
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Kiểm tra nhanh ở Frontend để tránh gọi API thừa
@@ -72,7 +98,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       fetchReminders();
       
     } catch (error: any) {
-      //  NẾU LỖI: Luồng chạy sẽ nhảy thẳng xuống đây, không xóa trắng form
+      //  NẾU LỖI: Luồng chạy sẽ nhảy thẳng xuống đây, không xóa trắng form
       
       // In toàn bộ object lỗi ra tab Console (F12) để dễ dàng kiểm tra cấu trúc
       console.error("Toàn bộ object lỗi từ API:", error);
@@ -215,44 +241,64 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </div>
                 ) : (
                   <div className="space-y-4 text-left">
-                    {reminders.map((reminder) => (
-                      <div
-                        key={reminder.id}
-                        className={`group relative overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-md ${
-                          reminder.completed
-                            ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 dark:from-green-900/20 dark:to-emerald-900/20 dark:border-green-800"
-                            : "bg-gradient-to-r from-white to-gray-50 border-gray-200 dark:from-gray-800 dark:to-gray-900 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
-                        }`}
-                      >
-                        <div className="p-5">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-base font-semibold mb-2 ${
-                                reminder.completed 
-                                  ? "line-through text-gray-500 dark:text-gray-400" 
-                                  : "text-gray-900 dark:text-white"
-                              }`}>
-                                {reminder.message}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Ngày: {formatDate(reminder.date)}
-                              </p>
-                            </div>
-                            <div className="flex-shrink-0 ml-4">
-                              <span
-                                className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-                                  reminder.completed
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                    : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                                }`}
-                              >
-                                {reminder.completed ? "Hoàn thành" : "Chờ xử lý"}
-                              </span>
+                    {reminders.map((reminder: any) => {
+                      // Kiểm tra xem reminder này đã hoàn thành chưa (từ DB hoặc từ LocalStorage)
+                      const isCompleted = reminder.completed || completedIds.includes(reminder.id);
+
+                      return (
+                        <div
+                          key={reminder.id}
+                          className={`group relative overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-md ${
+                            isCompleted
+                              ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 dark:from-green-900/20 dark:to-emerald-900/20 dark:border-green-800"
+                              : "bg-gradient-to-r from-white to-gray-50 border-gray-200 dark:from-gray-800 dark:to-gray-900 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
+                          }`}
+                        >
+                          <div className="p-5">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-base font-semibold mb-2 ${
+                                  isCompleted 
+                                    ? "line-through text-gray-500 dark:text-gray-400" 
+                                    : "text-gray-900 dark:text-white"
+                                }`}>
+                                  {reminder.message}
+                                </p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  Ngày: {formatDate(reminder.date)}
+                                </p>
+                              </div>
+                              
+                              {/* Cột hiển thị Badge Trạng thái và Nút Tick liền kề */}
+                              <div className="flex-shrink-0 ml-4 flex items-center gap-2">
+                                <span
+                                  className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+                                    isCompleted
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                      : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                                  }`}
+                                >
+                                  {isCompleted ? "Hoàn thành" : "Chờ xử lý"}
+                                </span>
+
+                                {/* NÚT TICK - Chỉ hiện khi KHÔNG PHẢI KHÁCH HÀNG và CHƯA HOÀN THÀNH */}
+                                {!isCustomer && !isCompleted && (
+                                  <button
+                                    onClick={() => handleMarkCompleted(reminder.id)}
+                                    className="flex items-center justify-center w-8 h-8 rounded-full text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all focus:outline-none"
+                                    title="Đánh dấu hoàn thành"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
