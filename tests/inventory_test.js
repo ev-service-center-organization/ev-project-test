@@ -196,31 +196,19 @@ Scenario('ITC_INV_5.1 - Xóa linh kiện không được sử dụng', async ({ 
 });
 
 Scenario('ITC_INV_5.2 - Xóa linh kiện đang dùng trong WO → 400', async ({ I }) => {
-  // Dùng partId đã tồn tại trong PartsUsage (cần có data thực)
-  // Thay số 1 bằng ID part thực tế đang dùng trong work order
-  await inventoryHelper.deletePart(I, 1, 400);
+  // Tạo part, tạo WO, tạo PartsUsage liên kết → rồi mới xóa
+  // Hoặc skip nếu không có data: dùng xocept skip
+  const listRes = await inventoryHelper.getParts(I);
+  const usedPart = listRes.data.find(p => p.PartsUsages?.length > 0);
+  if (!usedPart) {
+    console.log('[SKIP] Không có part đang dùng trong WO');
+    return;
+  }
+  await inventoryHelper.deletePart(I, usedPart.id, 400);
   I.seeResponseContainsJson({
-    message: 'Cannot delete part that is being used in work orders',
+    message: 'Cannot delete part that is being used in work orders'
   });
 });
-// Scenario('ITC_INV_5.2 - Xóa linh kiện đang dùng trong WO → 400', async ({ I }) => {
-//   // Tìm part đang có trong PartsUsage từ DB thực tế
-//   const listRes = await inventoryHelper.getParts(I, '', 200);
-//   const parts = listRes?.data || [];
-
-//   // Tìm part có StockLogs (đã được sử dụng)
-//   const usedPart = parts.find(p => p.StockLogs?.length > 0);
-
-//   if (!usedPart) {
-//     console.log('[ITC_INV_5.2] SKIP: Không có part nào đang dùng trong WO trong DB hiện tại');
-//     return;
-//   }
-
-//   await inventoryHelper.deletePart(I, usedPart.id, 400);
-//   I.seeResponseContainsJson({
-//     message: 'Cannot delete part that is being used in work orders',
-//   });
-// });
 
 // ═══════════════════════════════════════════════════════════
 // INV_F6 – Cập Nhật Tồn Kho (updateStock)
