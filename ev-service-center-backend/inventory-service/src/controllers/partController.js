@@ -13,7 +13,13 @@ import {
 // Get all parts with pagination and filtering
 export const getParts = async (req, res) => {
   try {
-    const { page = PAGINATION_DEFAULTS.PAGE, limit = PAGINATION_DEFAULTS.LIMIT, search, minStock } = req.query;
+    // const { page = PAGINATION_DEFAULTS.PAGE, limit = PAGINATION_DEFAULTS.LIMIT, search, minStock } = req.query;
+    // const offset = (page - 1) * limit;
+
+    // ✅ FIX BVA_INV_1.1 [ES-128]: validate page & limit không được âm hoặc 0
+    const { search, minStock } = req.query;
+    const page  = Math.max(1, parseInt(req.query.page)  || PAGINATION_DEFAULTS.PAGE);
+    const limit = Math.max(1, parseInt(req.query.limit) || PAGINATION_DEFAULTS.LIMIT);
     const offset = (page - 1) * limit;
 
     // Build search conditions
